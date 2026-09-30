@@ -2,6 +2,16 @@
 
 局域网连续故事视频生成界面，使用本机 ComfyUI `8188` 和 MiniMax H3 Director 作为生成引擎。
 
+## 界面预览
+
+以下工作台截图使用示例项目与虚构分镜展示界面，不包含真实生成结果。
+
+![故事项目与片段工作台](docs/screenshots/workspace.png)
+
+![人物与场景配置](docs/screenshots/setup.png)
+
+![登录界面](docs/screenshots/login.png)
+
 ## 开源许可
 
 Copyright 2026 leo_quan (jujur@qq.com).
