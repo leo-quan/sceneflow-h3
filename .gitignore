@@ -1,0 +1,9 @@
+.venv/
+BAK/
+__pycache__/
+*.pyc
+data/
+uploads/
+videos/
+webapp.log
+webapp.pid

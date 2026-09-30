@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SceneFlow H3 · 连续故事制片台</title>
+  <link rel="stylesheet" href="/static/style.css?v=20260815-11">
+  <link rel="stylesheet" href="/static/compact.css?v=20260816-32">
+</head>
+<body>
+  <section class="login-screen" id="loginScreen">
+    <form class="login-card" id="loginForm"><span class="eyebrow">SCENEFLOW ACCESS</span><h1>登录制片台</h1><p>登录后管理属于你的故事、片段和视频。</p><label>用户名<input id="loginUsername" required maxlength="80" autocomplete="username"></label><label>密码<input id="loginPassword" type="password" required autocomplete="current-password"></label><div class="login-error" id="loginError"></div><button class="primary" id="loginBtn" type="submit">登录</button></form>
+  </section>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">SF</span><div><strong>SceneFlow H3</strong><small>连续故事制片台</small></div></div>
+    <div class="status"><button class="topbar-icon" id="llmConfigBtn" title="大模型配置" aria-label="大模型配置"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.43 12.98c.04-.32.07-.65.07-.98s-.03-.66-.08-.98l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1a7.3 7.3 0 0 0-1.69-.98L14.5 2.42A.49.49 0 0 0 14 2h-4a.49.49 0 0 0-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1a.49.49 0 0 0-.61.22l-2 3.46a.49.49 0 0 0 .12.64l2.11 1.65c-.04.32-.08.66-.08.98s.03.66.08.98l-2.11 1.65a.5.5 0 0 0-.12.64l2 3.46a.5.5 0 0 0 .61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.04.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.08.49 0 .61-.22l2-3.46a.5.5 0 0 0-.12-.64l-2.11-1.65ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z"/></svg></button><button class="server-pill" id="taskCenterBtn"><i id="healthDot"></i><span><b id="healthText">正在连接引擎</b><small id="queueText">读取任务状态</small></span></button><span class="port">LAN · 9018</span></div>
+  </header>
+
+  <main class="shell">
+    <aside class="projects-panel panel">
+      <div class="panel-head"><div><span class="eyebrow">LIBRARY</span><h2>故事项目</h2></div><button class="icon-btn" id="newProjectBtn" title="新建项目">＋</button></div>
+      <div id="projectList" class="project-list"></div>
+      <div class="panel-foot">每个项目保存独立的人物、世界设定和续拍缓存。</div>
+    </aside>
+
+    <section class="workspace">
+      <div id="emptyState" class="empty-state panel">
+        <span class="empty-index">01</span><h1>建立你的连续故事</h1>
+        <p>上传人物参考图，定义固定世界，然后用2至20秒片段逐段拍摄。</p>
+        <button class="primary" id="emptyCreateBtn">创建第一个项目</button>
+      </div>
+
+      <div id="projectView" class="hidden">
+        <section class="project-hero panel">
+          <div><span class="eyebrow">ACTIVE PRODUCTION</span><input id="projectName" class="title-input" maxlength="120"></div>
+          <div class="hero-actions"><button class="ghost" id="exportStoryboardBtn">导出分镜故事</button><button class="ghost" id="exportProjectBtn">导出项目 JSON</button><button class="ghost danger-text" id="deleteProjectBtn">删除项目</button></div>
+        </section>
+
+        <div class="production-grid">
+          <details class="panel scene-config" id="sceneConfig">
+            <summary class="scene-config-summary">
+              <div><span class="eyebrow">PRODUCTION SETUP</span><h2>场景配置</h2><small id="sceneConfigStatus">检查配置中</small></div>
+              <span class="scene-config-toggle"><b class="when-closed">展开配置</b><b class="when-open">收起配置</b><i aria-hidden="true"></i></span>
+            </summary>
+            <section class="setup-column setup-strip">
+            <article class="setup-card config-card">
+              <div class="section-title"><span>01</span><div><h3>人物身份</h3><p>建议正脸 + 侧脸，同一个人物</p></div></div>
+              <div class="reference-grid">
+                <div class="photo-slot" data-slot="1"><img><div class="photo-empty"><b>主参考图</b><span>点击上传</span></div><input type="file" accept="image/*"><button class="photo-remove">×</button></div>
+                <div class="photo-slot" data-slot="2"><img><div class="photo-empty"><b>补充参考图</b><span>可选</span></div><input type="file" accept="image/*"><button class="photo-remove">×</button></div>
+              </div>
+              <label>人物、服装与配件约束<textarea id="characterPrompt" rows="4"></textarea></label>
+            </article>
+
+            <article class="setup-card config-card">
+              <div class="section-title"><span>02</span><div><h3>世界设定</h3><p>所有片段共享的环境条件</p></div></div>
+              <label>场景、时间、天气与光线<textarea id="environmentPrompt" rows="5"></textarea></label>
+              <label>连续性负面约束<textarea id="continuityNegativePrompt" rows="5" placeholder="例如：禁止换脸、服装突变、场景跳变、动作断裂、光线突变、重复动作、镜头轴线无故改变……"></textarea></label>
+              <label>视觉与摄影风格<textarea id="visualPrompt" rows="4"></textarea></label>
+              <label>声音与氛围<textarea id="audioPrompt" rows="3"></textarea></label>
+              <div class="settings-row">
+                <label>画布比例与分辨率<select id="canvas">
+                  <optgroup label="横屏">
+                    <option value="608x352">16:9 · 608 × 352</option>
+                    <option value="512x288">16:9 · 512 × 288</option>
+                    <option value="512x384">4:3 · 512 × 384</option>
+                    <option value="480x320">3:2 · 480 × 320</option>
+                    <option value="480x384">5:4 · 480 × 384</option>
+                    <option value="672x288">21:9 · 672 × 288</option>
+                  </optgroup>
+                  <optgroup label="竖屏">
+                    <option value="352x608">9:16 · 352 × 608</option>
+                    <option value="288x512">9:16 · 288 × 512</option>
+                    <option value="384x512">3:4 · 384 × 512</option>
+                    <option value="320x480">2:3 · 320 × 480</option>
+                    <option value="384x480">4:5 · 384 × 480</option>
+                  </optgroup>
+                  <optgroup label="方形">
+                    <option value="448x448">1:1 · 448 × 448</option>
+                    <option value="384x384">1:1 · 384 × 384</option>
+                  </optgroup>
+                </select></label>
+                <label>采样步数<input id="steps" type="number" min="1" max="50"></label>
+                <label>种子<input id="seed" type="number" min="0"></label>
+              </div>
+            </article>
+            </section>
+            <div class="scene-config-actions"><span>人物、世界和采样参数的修改需要保存后生效</span><button class="primary" id="saveProjectBtn">保存场景配置</button></div>
+          </details>
+
+          <section class="timeline-column">
+            <article class="panel timeline-card">
+              <div class="panel-head"><div><span class="eyebrow">STORY REEL</span><h2>故事片段</h2></div><div class="reel-actions"><button class="ghost small" id="generateChainBtn">▶ 合并已有片段</button><button class="primary small" id="addSegmentBtn">＋ 添加片段</button></div></div>
+              <div id="combinedVideos" class="combined-videos"></div>
+              <div id="segmentList" class="segment-list"></div>
+            </article>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="projectDialog">
+    <form method="dialog" class="dialog-card" id="projectForm"><span class="eyebrow">NEW PRODUCTION</span><h2>创建故事项目</h2><label>项目名称<input id="newProjectName" required maxlength="120" placeholder="例如：未来清晨"></label><div class="dialog-actions"><button type="button" class="ghost dialog-cancel">取消</button><button value="default" class="primary" id="confirmProjectBtn">创建项目</button></div></form>
+  </dialog>
+
+  <dialog id="llmConfigDialog">
+    <form class="dialog-card llm-config-card" id="llmConfigForm">
+      <div class="llm-config-head"><div><span class="eyebrow">AI GATEWAY</span><h2>大模型配置</h2><p>配置仅保存在当前服务器，不会自动发起网络请求。</p></div><button type="button" class="dialog-close" id="closeLlmConfig">×</button></div>
+      <div class="llm-config-state"><i id="llmConfigDot"></i><span><b id="llmConfigState">读取配置中</b><small id="llmConfigUpdated"></small></span></div>
+      <label>Base URL<input id="llmBaseUrl" type="url" required placeholder="https://gateway.example.com/"></label>
+      <label>API Key<input id="llmApiKey" type="password" autocomplete="new-password" placeholder="留空表示保持当前密钥"><small id="llmApiKeyHint">当前未配置</small></label>
+      <label>模型名称<input id="llmModelName" required maxlength="200" placeholder="例如：gpt-5.6-sol"></label>
+      <label>修改密码<input id="llmConfigPassword" type="password" required autocomplete="current-password" placeholder="修改配置必须验证密码"></label>
+      <div class="dialog-actions"><button type="button" class="ghost" id="cancelLlmConfig">取消</button><button type="submit" class="primary" id="saveLlmConfig">验证并保存</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="userAdminDialog">
+    <section class="dialog-card user-admin-card"><div class="llm-config-head"><div><span class="eyebrow">ACCESS CONTROL</span><h2>用户管理</h2><p>创建账号、启停用户或重设密码。</p></div><button type="button" class="dialog-close" id="closeUserAdmin">×</button></div><form class="user-create-form" id="userCreateForm"><label>新用户名<input id="newUsername" required maxlength="80" pattern="[A-Za-z0-9_.-]+" placeholder="字母、数字、点、横线或下划线"></label><label>初始密码<input id="newUserPassword" type="password" required minlength="6" placeholder="至少6个字符"></label><button class="primary" type="submit">创建用户</button></form><div class="user-list" id="userList"></div></section>
+  </dialog>
+
+  <dialog id="segmentDialog">
+    <form method="dialog" class="dialog-card wide" id="segmentForm">
+      <span class="eyebrow" id="segmentDialogEyebrow">NEW SCENE</span><h2 id="segmentDialogTitle">添加故事片段</h2>
+      <input type="hidden" id="editingSegmentId">
+      <div class="form-two"><label>片段标题<input id="segmentTitle" required maxlength="120" placeholder="例如：进入空中花园"></label><label>时长<select id="segmentDuration"><option value="2">2 秒 · 56帧</option><option value="3">3 秒 · 73帧</option><option value="5">5 秒 · 124帧</option><option value="6">6 秒 · 158帧</option><option value="8">8 秒 · 192帧</option><option value="10">10 秒 · 243帧</option><option value="12">12 秒 · 294帧</option><option value="15">15 秒 · 362帧</option><option value="18">18 秒 · 447帧</option><option value="20" selected>20 秒 · 481帧</option></select></label></div>
+      <fieldset class="continuity-settings"><legend>镜头衔接方式</legend><div class="continuity-options"><label class="radio-card"><input type="radio" name="continuity" value="continue" checked><span><b>接续指定片段</b><small>继承来源片段末帧、机位、运动与声音</small></span></label><label class="radio-card"><input type="radio" name="continuity" value="cut"><span><b>新镜头，保持人物与世界</b><small>不继承末帧，但保留人物和场景约束</small></span></label></div><label id="sourceSegmentRow">接续来源片段<select id="sourceSegment"></select></label></fieldset>
+      <section class="segment-constraints"><div><span class="eyebrow">SCENE CONSTRAINTS</span><h3>片段约束</h3><p>图片可约束本片段中的人物、物品或环境，生成模型会按图片1至5理解。</p></div><div class="segment-reference-grid"><div class="segment-photo-slot" data-slot="1"><img><span><b>图片1</b><small>点击上传</small></span><input type="file" accept="image/*"><button type="button" class="segment-photo-remove">×</button></div><div class="segment-photo-slot" data-slot="2"><img><span><b>图片2</b><small>点击上传</small></span><input type="file" accept="image/*"><button type="button" class="segment-photo-remove">×</button></div><div class="segment-photo-slot" data-slot="3"><img><span><b>图片3</b><small>点击上传</small></span><input type="file" accept="image/*"><button type="button" class="segment-photo-remove">×</button></div><div class="segment-photo-slot" data-slot="4"><img><span><b>图片4</b><small>点击上传</small></span><input type="file" accept="image/*"><button type="button" class="segment-photo-remove">×</button></div><div class="segment-photo-slot" data-slot="5"><img><span><b>图片5</b><small>点击上传</small></span><input type="file" accept="image/*"><button type="button" class="segment-photo-remove">×</button></div></div><label>本片段世界设定 <small>可选，与全局冲突时以此处为准</small><textarea id="segmentWorldPrompt" rows="4" placeholder="描述仅适用于本片段的地点、时间、天气、光线、空间布局或环境规则。"></textarea></label></section>
+      <section class="ai-storyboard"><div class="ai-storyboard-head"><div><span class="eyebrow">AI STORYBOARD</span><b>AI 延续分镜</b></div><button type="button" class="ai-generate" id="generateStoryboardBtn">生成 / 完善分镜</button></div><label>人工故事走向 <small>可选，将与最终分镜一并保存</small><textarea id="storyDirection" rows="3" placeholder="简单描述你希望接下来发生什么；留空时AI会按标题和上段剧情自然延续。"></textarea></label><small class="ai-storyboard-hint" id="aiStoryboardHint">AI会结合标题、所选时长、项目设定和接续来源生成内容，不会自动保存。</small></section>
+      <label>最终本段剧情 <small>用于视频生成，可继续人工修改</small><textarea id="segmentPrompt" rows="9" required placeholder="按时间顺序描述人物动作、镜头和声音，或点击上方按钮由AI生成。"></textarea></label>
+      <label>结尾续拍状态 <small>可选</small><textarea id="endingPrompt" rows="3" placeholder="例如：左手距离门禁十厘米，在继续向前的动作中结束。"></textarea></label>
+      <fieldset class="refine-settings"><legend>画面精修</legend><label class="radio-card refine-toggle"><input type="checkbox" id="refineEnabled"><span><b>启用二次重采样精修</b><small>同分辨率再采样一次，改善面部与纹理；生成耗时明显增加</small></span></label><div id="refineOptions" class="form-two hidden"><label>去噪强度<input id="refineDenoise" type="number" min="0.05" max="0.85" step="0.01" value="0.25"><small>建议0.20至0.35，越高改动越大</small></label><label>精修步数<input id="refineSteps" type="number" min="0" max="50" step="1" value="10"><small>0为自动，建议10步</small></label></div></fieldset>
+      <div class="dialog-actions"><button type="button" class="ghost dialog-cancel">取消</button><button value="default" class="primary" id="saveSegmentBtn">保存片段</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="taskDialog">
+    <section class="dialog-card task-center">
+      <div class="task-center-head"><div><span class="eyebrow">SERVER ACTIVITY</span><h2>全局任务中心</h2></div><button class="dialog-close" id="closeTaskCenter">×</button></div>
+      <div class="server-overview">
+        <div><span>GPU 状态</span><b id="serverState">读取中</b></div>
+        <div><span>全局正在生成</span><b id="runningCount">0</b></div>
+        <div><span>全局等待队列</span><b id="queuedCount">0</b></div>
+        <div><span>其中 ComfyUI 外部任务</span><b id="comfyQueueCount">0</b></div>
+      </div>
+      <div class="task-section"><div class="task-section-title"><h3>运行与等待</h3><span>自动刷新</span></div><div id="activeTaskList" class="global-task-list"></div></div>
+      <div class="task-section"><div class="task-section-title"><h3>最近任务</h3><span>最近12条</span></div><div id="recentTaskList" class="global-task-list recent"></div></div>
+    </section>
+  </dialog>
+
+  <dialog id="deleteSegmentDialog">
+    <section class="dialog-card delete-confirm-card">
+      <span class="eyebrow">DESTRUCTIVE ACTION</span>
+      <h2>确认删除片段</h2>
+      <p>即将删除片段“<b id="deleteSegmentName"></b>”及其全部生成视频。此操作无法撤销。</p>
+      <label>请输入大写 <code>DELETE</code> 以确认
+        <input id="deleteSegmentInput" type="text" autocomplete="off" spellcheck="false" placeholder="DELETE">
+      </label>
+      <div class="dialog-actions">
+        <button type="button" class="ghost" id="cancelDeleteSegment">取消</button>
+        <button type="button" class="confirm-delete" id="confirmDeleteSegment" disabled>确认删除</button>
+      </div>
+    </section>
+  </dialog>
+
+  <dialog id="deleteVideoDialog">
+    <section class="dialog-card delete-confirm-card">
+      <span class="eyebrow">DELETE VIDEO</span>
+      <h2>确认删除视频</h2>
+      <p>视频文件和全部关键帧截图将被永久删除，此操作无法撤销。</p>
+      <label>请输入大写 <code>DELETE</code> 以确认
+        <input id="deleteVideoInput" type="text" autocomplete="off" spellcheck="false" placeholder="DELETE">
+      </label>
+      <div class="dialog-actions"><button type="button" class="ghost" id="cancelDeleteVideo">取消</button><button type="button" class="confirm-delete" id="confirmDeleteVideo" disabled>确认删除</button></div>
+    </section>
+  </dialog>
+
+  <div id="toast" class="toast"></div>
+  <div class="session-actions"><button class="admin-only" id="userAdminBtn">用户管理</button><button id="logoutBtn"><b id="currentUsername"></b> · 退出</button></div>
+  <script src="/static/app.js?v=20260816-28"></script>
+</body>
+</html>
